@@ -313,6 +313,26 @@ function normalizePayloadsForChannelDelivery(
         sanitizedPayload = { ...payload, text: sanitizeForPlainText(payload.text) };
       }
     }
+    // Strip markdown formatting for iMessage (plain-text surface)
+    if (channel === "imessage" && sanitizedPayload.text) {
+      let t = sanitizedPayload.text;
+      t = t.replace(/\[\[[^\]]*\]\]\s*/g, "");              // [[annotations]]
+      t = t.replace(/^#{1,6}\s+/gm, "");                     // headers
+      t = t.replace(/\[ \]/g, "☐").replace(/\[[xX]\]/g, "☑"); // checkboxes
+      t = t.replace(/^(\s*)[*+-]\s+/gm, "$1• ");             // list markers → bullet
+      t = t.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");         // links → text only
+      t = t.replace(/^>\s?/gm, "");                           // blockquotes
+      t = t.replace(/\*\*(.+?)\*\*/gs, "$1").replace(/__(.+?)__/gs, "$1"); // bold
+      t = t.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/gs, "$1");       // italic *
+      t = t.replace(/(?<!_)_(?!_)(.+?)(?<!_)_(?!_)/gs, "$1");             // italic _
+      t = t.replace(/~~(.+?)~~/gs, "$1");                     // strikethrough
+      t = t.replace(/```[\s\S]*?```/g, m => m.replace(/```\w*\n?/g, "")); // code blocks
+      t = t.replace(/`([^`]+)`/g, "$1");                      // inline code
+      t = t.replace(/^[-*_]{3,}\s*$/gm, "");                  // horizontal rules
+      t = t.replace(/\n{3,}/g, "\n\n");                       // collapse blank lines
+      sanitizedPayload = { ...sanitizedPayload, text: t };
+    }
+
     const normalized = normalizePayloadForChannelDelivery(sanitizedPayload, channel);
     if (normalized) {
       normalizedPayloads.push(normalized);

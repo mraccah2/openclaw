@@ -185,7 +185,7 @@ export async function buildReplyPayloads(params: {
   // suppress the current conversation's final reply.
   // If target metadata is unavailable, keep legacy dedupe behavior.
   const dedupeMessagingToolPayloads =
-    suppressMessagingToolReplies || messagingToolSentTargets.length === 0;
+    suppressMessagingToolReplies || messagingToolSentTargets.length === 0 || messagingToolSentTexts.length > 0;
   const messagingToolSentMediaUrls = dedupeMessagingToolPayloads
     ? await normalizeSentMediaUrlsForDedupe({
         sentMediaUrls: params.messagingToolSentMediaUrls ?? [],

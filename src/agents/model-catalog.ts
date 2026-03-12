@@ -70,6 +70,18 @@ const SYNTHETIC_CATALOG_FALLBACKS: readonly SyntheticCatalogFallback[] = [
   },
 ] as const;
 
+/** Hardcoded catalog entries for models not yet in the pi-ai discovery catalog. */
+const HARDCODED_CATALOG_ENTRIES: readonly ModelCatalogEntry[] = [
+  {
+    id: "gemini-3.1-flash-lite-preview",
+    name: "Gemini 3.1 Flash Lite Preview",
+    provider: "google",
+    reasoning: false,
+    input: ["text", "image"],
+    contextWindow: 1048576,
+  },
+];
+
 function applySyntheticCatalogFallbacks(models: ModelCatalogEntry[]): void {
   const findCatalogEntry = (provider: string, id: string) =>
     models.find(
@@ -253,6 +265,17 @@ export async function loadModelCatalog(params?: {
       }
       mergeConfiguredOptInProviderModels({ config: cfg, models });
       applySyntheticCatalogFallbacks(models);
+      // Inject hardcoded catalog entries for models not yet in the discovery catalog.
+      for (const hardcoded of HARDCODED_CATALOG_ENTRIES) {
+        const exists = models.some(
+          (entry) =>
+            entry.provider.toLowerCase() === hardcoded.provider.toLowerCase() &&
+            entry.id.toLowerCase() === hardcoded.id.toLowerCase(),
+        );
+        if (!exists) {
+          models.push(hardcoded);
+        }
+      }
 
       if (models.length === 0) {
         // If we found nothing, don't cache this result so we can try again.

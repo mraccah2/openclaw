@@ -30,6 +30,7 @@ export function handleAgentEnd(ctx: EmbeddedPiSubscribeContext) {
   const isError = isAssistantMessage(lastAssistant) && lastAssistant.stopReason === "error";
 
   if (isError && lastAssistant) {
+    ctx.log.warn(`[FAILOVER-RAW] provider=${lastAssistant.provider} model=${lastAssistant.model} rawError=${(lastAssistant.errorMessage ?? "").slice(0, 500)}`);
     const friendlyError = formatAssistantErrorText(lastAssistant, {
       cfg: ctx.params.config,
       sessionKey: ctx.params.sessionKey,

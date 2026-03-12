@@ -344,6 +344,9 @@ export function convertLinksToFlexBubble(links: MarkdownLink[]): FlexBubble {
 export function stripMarkdown(text: string): string {
   let result = text;
 
+  // Remove [[annotations]] (OpenClaw internal tags)
+  result = result.replace(/\[\[[^\]]*\]\]\s*/g, "");
+
   // Remove bold: **text** or __text__
   result = result.replace(/\*\*(.+?)\*\*/g, "$1");
   result = result.replace(/__(.+?)__/g, "$1");

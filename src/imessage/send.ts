@@ -147,7 +147,8 @@ export async function sendMessageIMessage(
     });
     message = convertMarkdownTables(message, tableMode);
   }
-  message = prependReplyTagIfNeeded(message, opts.replyToId);
+  // Disabled: imsg v0.5.0 doesn't parse [[reply_to:...]] tags — they leak verbatim
+  // message = prependReplyTagIfNeeded(message, opts.replyToId);
 
   const params: Record<string, unknown> = {
     text: message,

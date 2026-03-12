@@ -45,6 +45,7 @@ const OVERLOADED_ERROR_USER_MESSAGE =
 
 function formatRateLimitOrOverloadedErrorCopy(raw: string): string | undefined {
   if (isRateLimitErrorMessage(raw)) {
+    log.warn(`[RATELIMIT-RAW] masked error: ${(raw ?? "").slice(0, 500)}`);
     return RATE_LIMIT_ERROR_USER_MESSAGE;
   }
   if (isOverloadedErrorMessage(raw)) {
@@ -861,6 +862,9 @@ export function classifyFailoverReason(raw: string): FailoverReason | null {
   if (isPeriodicUsageLimitErrorMessage(raw)) {
     return isBillingErrorMessage(raw) ? "billing" : "rate_limit";
   }
+  if (isBillingErrorMessage(raw)) {
+    return "billing";
+  }
   if (isRateLimitErrorMessage(raw)) {
     return "rate_limit";
   }
@@ -881,9 +885,6 @@ export function classifyFailoverReason(raw: string): FailoverReason | null {
   }
   if (isCloudCodeAssistFormatError(raw)) {
     return "format";
-  }
-  if (isBillingErrorMessage(raw)) {
-    return "billing";
   }
   if (isTimeoutErrorMessage(raw)) {
     return "timeout";
